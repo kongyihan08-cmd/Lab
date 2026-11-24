@@ -1489,6 +1489,36 @@
           });
         });
       }
+
+      if (addSlipForm) {
+        addSlipForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const role = newSlipRole ? newSlipRole.value.trim() : 'Author Note';
+          const title = newSlipTitle ? newSlipTitle.value.trim() : '';
+          const text = newSlipText ? newSlipText.value.trim() : '';
+
+          if (!title && !text) {
+            showStatus('請輸入標題或備註內容再送出喔。');
+            return;
+          }
+
+          reviewerSlips.push({
+            id: 'custom-' + Date.now(),
+            role: role.toUpperCase(),
+            title: title || text,
+            authorResponse: title ? text : '',
+            timestamp: 'Added · Nov. 23, 2026'
+          });
+
+          const ok = await saveReviewerSlips();
+          if (newSlipTitle) newSlipTitle.value = '';
+          if (newSlipText) newSlipText.value = '';
+          renderReviewerSlips();
+          if (ok) {
+            showStatus('已新增並同步到雲端！');
+          }
+        });
+      }
       
       if (copyRebuttalSummaryBtn) {
         copyRebuttalSummaryBtn.addEventListener('click', () => {
