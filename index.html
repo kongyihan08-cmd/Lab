@@ -1353,7 +1353,7 @@
       /* =====================================================================
        * 6. REVIEWER COMMENTS & FIRST-AUTHOR RESPONSE RENDERING
        * ===================================================================== */
-      function renderReviewerSlips() {
+ function renderReviewerSlips() {
         if (!slipsContainer) return;
         slipsContainer.innerHTML = '';
 
@@ -1366,6 +1366,14 @@
           card.className = 'reviewer-comment-card relative rounded-2xl p-5 sm:p-6 overflow-hidden';
 
           const hasReply = Boolean(slip.authorResponse && slip.authorResponse.trim());
+          // 只要是新增的項目（時間有 Added、或 id/標記符合），就顯示 Delete；預設項目不會有
+          const canDelete = Boolean(
+            slip.isNew ||
+            slip.isCustom ||
+            String(slip.id || '').startsWith('custom-') ||
+            String(slip.id || '').startsWith('new-') ||
+            String(slip.timestamp || '').includes('Added')
+          );
 
           card.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
@@ -1373,9 +1381,16 @@
                 <span>✦</span>
                 <span>${escapeHtml(slip.role)}</span>
               </span>
-              <span class="font-mono text-[10px] text-inkMuted bg-creamCotton/80 px-2.5 py-0.5 rounded-full border border-brassClip/20">
-                ${escapeHtml(slip.timestamp || `Item #${idx + 1}`)}
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] text-inkMuted bg-creamCotton/80 px-2.5 py-0.5 rounded-full border border-brassClip/20">
+                  ${escapeHtml(slip.timestamp || `Item #${idx + 1}`)}
+                </span>
+                ${
+                  canDelete
+                    ? `<button type="button" data-del-index="${idx}" class="delete-new-slip-btn font-mono text-[10.5px] text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-0.5 rounded-full border border-red-300 cursor-pointer">Delete</button>`
+                    : ''
+                }
+              </div>
             </div>
 
             <blockquote class="relative pl-4 border-l-2 border-brassClip/45 font-serif text-[15px] sm:text-base leading-relaxed text-inkDeep mb-4">
@@ -1423,17 +1438,14 @@
 
         slipsContainer.querySelectorAll('.delete-new-slip-btn').forEach((btn) => {
           btn.addEventListener('click', async () => {
-            const targetId = btn.getAttribute('data-del-id');
-            if (!targetId) return;
+            const idx = Number(btn.getAttribute('data-del-index'));
+            if (Number.isNaN(idx) || !reviewerSlips[idx]) return;
             if (!confirm('確定要刪除這筆新增的內容嗎？')) return;
-
-            const index = reviewerSlips.findIndex((item) => String(item.id) === String(targetId));
-            if (index === -1 || !reviewerSlips[index].isNew) return;
 
             btn.disabled = true;
             btn.textContent = 'Deleting…';
 
-            reviewerSlips.splice(index, 1);
+            reviewerSlips.splice(idx, 1);
             const ok = await saveReviewerSlips();
             renderReviewerSlips();
             if (ok) {
@@ -1477,38 +1489,7 @@
           });
         });
       }
-
-      if (addSlipForm) {
-        addSlipForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const role = newSlipRole ? newSlipRole.value.trim() : 'Author Note';
-          const title = newSlipTitle ? newSlipTitle.value.trim() : '';
-          const text = newSlipText ? newSlipText.value.trim() : '';
-
-          if (!title && !text) {
-            showStatus('');
-            return;
-          }
-
-        reviewerSlips.push({
-      id: 'new-' + Date.now(),
-      isNew: true,
-      role: role.toUpperCase(),
-      title: title || text,
-      authorResponse: title ? text : '',
-      timestamp: 'Added · Nov. 23, 2026'
-    });
-
-    const ok = await saveReviewerSlips();
-    if (newSlipTitle) newSlipTitle.value = '';
-    if (newSlipText) newSlipText.value = '';
-    renderReviewerSlips();
-    if (ok) {
-      showStatus('已新增並同步到雲端！');
-    }
-  });
-}
-
+      
       if (copyRebuttalSummaryBtn) {
         copyRebuttalSummaryBtn.addEventListener('click', () => {
           const lines = [
