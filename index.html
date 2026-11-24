@@ -1421,6 +1421,27 @@
           slipsContainer.appendChild(card);
         });
 
+        slipsContainer.querySelectorAll('.delete-new-slip-btn').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const targetId = btn.getAttribute('data-del-id');
+            if (!targetId) return;
+            if (!confirm('確定要刪除這筆新增的內容嗎？')) return;
+
+            const index = reviewerSlips.findIndex((item) => String(item.id) === String(targetId));
+            if (index === -1 || !reviewerSlips[index].isNew) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Deleting…';
+
+            reviewerSlips.splice(index, 1);
+            const ok = await saveReviewerSlips();
+            renderReviewerSlips();
+            if (ok) {
+              showStatus('已刪除新增項目並同步到雲端！');
+            }
+          });
+        });
+
         slipsContainer.querySelectorAll('.save-reply-btn').forEach((btn) => {
           btn.addEventListener('click', async () => {
             const id = btn.getAttribute('data-save-id');
@@ -1465,27 +1486,28 @@
           const text = newSlipText ? newSlipText.value.trim() : '';
 
           if (!title && !text) {
-            showStatus('請輸入標題或備註內容再送出喔。');
+            showStatus('');
             return;
           }
 
-          reviewerSlips.push({
-            id: 'custom-' + Date.now(),
-            role: role.toUpperCase(),
-            title: title || text,
-            authorResponse: title ? text : '',
-            timestamp: 'Added · Nov. 23, 2026'
-          });
+        reviewerSlips.push({
+      id: 'new-' + Date.now(),
+      isNew: true,
+      role: role.toUpperCase(),
+      title: title || text,
+      authorResponse: title ? text : '',
+      timestamp: 'Added · Nov. 23, 2026'
+    });
 
-          const ok = await saveReviewerSlips();
-          if (newSlipTitle) newSlipTitle.value = '';
-          if (newSlipText) newSlipText.value = '';
-          renderReviewerSlips();
-          if (ok) {
-            showStatus('已新增並同步到雲端！');
-          }
-        });
-      }
+    const ok = await saveReviewerSlips();
+    if (newSlipTitle) newSlipTitle.value = '';
+    if (newSlipText) newSlipText.value = '';
+    renderReviewerSlips();
+    if (ok) {
+      showStatus('已新增並同步到雲端！');
+    }
+  });
+}
 
       if (copyRebuttalSummaryBtn) {
         copyRebuttalSummaryBtn.addEventListener('click', () => {
