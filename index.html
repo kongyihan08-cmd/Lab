@@ -583,13 +583,13 @@
           id="status-banner"
           class="hidden mb-6 px-4 py-2.5 rounded-xl bg-goldFoil/20 border border-brassClip/40 text-xs sm:text-sm text-inkDeep flex items-center justify-between"
         >
-          <span id="status-banner-text">已複製到剪貼簿，隨時可以貼上傳給他。</span>
+          <span id="status-banner-text">已複製到剪貼簿。</span>
           <button
             id="status-close-btn"
             type="button"
             class="text-xs text-inkMuted hover:text-inkDeep ml-3 cursor-pointer"
           >
-            知道了
+            OK
           </button>
         </div>
 
@@ -967,7 +967,7 @@
                     id="new-slip-title"
                     type="text"
                     maxlength="48"
-                    placeholder="例如：Response to Comment 1–3 / 補充說明"
+                    placeholder=""
                     class="w-full rounded-xl bg-white/90 border border-brassClip/30 px-3.5 py-2.5 text-xs text-inkDeep focus:outline-none focus:border-brassClip"
                   />
                 </div>
@@ -980,7 +980,7 @@
                 <textarea
                   id="new-slip-text"
                   rows="3"
-                  placeholder="輸入審查意見或第一作者回覆說明..."
+                  placeholder=""
                   class="w-full rounded-xl bg-white/90 border border-brassClip/30 px-3.5 py-2.5 text-xs sm:text-sm font-serif text-inkDeep focus:outline-none focus:border-brassClip resize-y"
                 ></textarea>
               </div>
@@ -1043,8 +1043,8 @@
        * 1. LETTER & REVIEWER COMMENTS DATA
        * ===================================================================== */
       const DEFAULT_LETTER_PARAGRAPHS = [
-        '謝謝你那天跟我分享很多想法，其實感到開心且榮幸，謝謝你的信任。雖然我未必能給出什麼特別通透的見解，化學也忘得差不多了，但如果哪天想找人聊聊，我很樂意試著把塵封已久的化學慢慢撿回來，也很樂意聽你聊聊生活中的各種心情與想法。',
-        'BTW 雖然我素有句點王的稱號、下班偶爾還會累到斷電睡著，但至少講電話或傳訊息時的認真傾聽能力，我對自己還是蠻有信心的 :)'
+        '謝謝你那天跟我分享很多想法，其實感到開心且榮幸，謝謝你的信任。雖然我未必能想出特別通透的見解，化學也忘得差不多了，但如果哪天想找人聊聊，我很樂意試著把塵封已久的化學慢慢撿回來，也很樂意聽你聊聊生活中的各種心情與想法。',
+        'BTW 雖然我素有句點王的稱號、大部分的時候偏ㄎㄧㄤ、下班偶爾還會斷電睡著，但至少講(電)話或傳訊息時的認真傾聽能力，我對自己還是蠻有信心的 :)'
       ];
 
       const INITIAL_SLIPS = [
@@ -1449,7 +1449,7 @@
             const ok = await saveReviewerSlips();
             renderReviewerSlips();
             if (ok) {
-              showStatus('已刪除新增項目並同步到雲端！');
+              showStatus('已刪除新增項目！');
             }
           });
         });
@@ -1467,7 +1467,7 @@
               const ok = await saveReviewerSlips();
               renderReviewerSlips();
               if (ok) {
-                showStatus('已儲存並同步到雲端！其他分頁與裝置都能即時看到。');
+                showStatus('Saved.');
               }
             }
           });
@@ -1515,7 +1515,7 @@
           if (newSlipText) newSlipText.value = '';
           renderReviewerSlips();
           if (ok) {
-            showStatus('已新增並同步到雲端！');
+            showStatus('Saved.');
           }
         });
       }
@@ -1545,7 +1545,7 @@
           tempArea.select();
           try {
             document.execCommand('copy');
-            showStatus('已複製完整 Reviewer Comments 與回覆到剪貼簿！');
+            showStatus('Copied.');
           } catch (err) {
             showStatus('無法自動複製，請手動選取文字複製。');
           }
